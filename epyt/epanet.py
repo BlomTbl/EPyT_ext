@@ -463,6 +463,8 @@ class epanet:
         # Constants
         # Demand model types. DDA #0 Demand driven analysis,
         # PDA #1 Pressure driven analysis.
+        self.solved_for_simtime = None
+        self.solved = None
         self.DEMANDMODEL = ['DDA', 'PDA']
         # Link types
         self.TYPELINK = ['CVPIPE', 'PIPE', 'PUMP', 'PRV', 'PSV',
@@ -11106,7 +11108,20 @@ class epanet:
                     eval('self.api.' + fun + '(i, categ, param[j])')
                 j += 1
 
+    def epsolve(self, simtime=0):
+        """ Solve Hydraulic Network for Single Timestep"""
+        if self.solved and self.solved_for_simtime == simtime:
+            return
 
+        #self.reset()
+        self.api.ENsettimeparam(4, simtime)
+        self.api.ENopenH()
+        self.api.ENinitH(0)
+        self.api.ENrunH()
+        self.api.ENcloseH()
+        self.solved = True
+        self.solved_for_simtime = simtime
+       
 class epanetapi:
     """
     EPANET Toolkit functions - API
